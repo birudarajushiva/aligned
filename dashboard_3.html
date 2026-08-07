@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aligned — Portfolio Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --page-bg:#EDEDF4;
+    --panel-bg:#F7F7FB;
+    --card-bg:#FFFFFF;
+    --grad-risk-1:#FF9A6C; --grad-risk-2:#F16E92; --grad-risk-3:#B98CF0;
+    --grad-up-1:#7FE0E8;  --grad-up-2:#6FA6F5;  --grad-up-3:#9FB9FF;
+    --blue:#3462F2;
+    --blue-soft:#E8EDFF;
+    --danger:#F0506B;
+    --danger-soft:#FDE7EB;
+    --success:#22B27D;
+    --success-soft:#E1F6EC;
+    --info:#3462F2;
+    --info-soft:#E8EDFF;
+    --ink:#15151F;
+    --ink-soft:#8A8A99;
+    --ink-faint:#B6B6C3;
+    --border:#EAEAF1;
+    --shadow-card:0 10px 26px rgba(24,24,50,0.06);
+    --shadow-lift:0 14px 34px rgba(24,24,50,0.09);
+    --r-lg:28px; --r-md:20px; --r-sm:13px;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;margin:0;}
+  body{
+    font-family:'Inter',sans-serif;
+    background:var(--page-bg);
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+    font-feature-settings:'tnum' 1;
+  }
+  .num{font-variant-numeric:tabular-nums;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+  @media (prefers-reduced-motion: reduce){ *{animation-duration:.001ms !important; transition-duration:.001ms !important;} }
+  a{color:inherit;}
+  button{font-family:inherit;}
+
+  .page{max-width:1440px; margin:0 auto; padding:28px 32px 40px;}
+
+  /* ===== BOARD (the big rounded container) ===== */
+  .board{
+    background:var(--panel-bg);
+    border-radius:var(--r-lg);
+    box-shadow:var(--shadow-card);
+    padding:26px 26px 30px;
+  }
+
+  /* ---- top row inside board ---- */
+  .board-top{display:flex; align-items:center; justify-content:space-between; gap:24px; padding:2px 6px 24px; flex-wrap:wrap;}
+  .board-top-left{display:flex; align-items:center; gap:14px;}
+  .logo-mark{
+    width:46px; height:46px; border-radius:14px; flex-shrink:0;
+    background:linear-gradient(135deg,var(--blue),#7C6CF2);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .board-top-text h1{margin:0; font-size:19px; font-weight:800; letter-spacing:-.01em; display:flex; align-items:center; gap:9px;}
+  .board-top-text p{margin:2px 0 0; font-size:13px; color:var(--ink-soft);}
+  .sim-badge{
+    font-size:10.5px; font-weight:700; letter-spacing:.04em; text-transform:uppercase;
+    background:var(--success-soft); color:var(--success);
+    padding:4px 10px; border-radius:100px; border:1px solid rgba(34,178,125,0.18);
+  }
+  .board-top-right{display:flex; align-items:center; gap:12px;}
+  .search-wrap{position:relative;}
+  .search-wrap input{
+    width:220px; background:var(--card-bg); border:1px solid var(--border);
+    border-radius:100px; padding:10px 16px 10px 38px; font-size:13px; color:var(--ink);
+    font-family:inherit; outline:none; transition:width .18s ease, box-shadow .18s ease;
+  }
+  .search-wrap input:focus{width:260px; box-shadow:0 0 0 3px var(--blue-soft);}
+  .search-wrap svg{position:absolute; left:13px; top:50%; transform:translateY(-50%); color:var(--ink-faint);}
+  .avatar-chip{
+    width:38px; height:38px; border-radius:50%; background:var(--card-bg); border:1px solid var(--border);
+    display:flex; align-items:center; justify-content:center; color:var(--ink-soft); flex-shrink:0;
+  }
+
+  /* ===== ERROR BANNER ===== */
+  .error-banner{
+    display:none; align-items:center; justify-content:space-between; gap:14px;
+    background:var(--danger-soft); border:1px solid rgba(240,80,107,0.25);
+    color:#9A2E45; padding:12px 18px; border-radius:var(--r-sm); font-size:13.5px; margin:0 6px 18px;
+  }
+  .error-banner button{
+    background:#fff; border:1px solid rgba(240,80,107,0.35); color:#9A2E45;
+    padding:6px 12px; border-radius:8px; font-size:12.5px; font-weight:700; cursor:pointer;
+  }
+
+  /* ===== ROW 1: scan card + 2 gradient cards ===== */
+  .row-1{display:grid; grid-template-columns:1fr 1fr 1fr; gap:18px; padding:0 6px;}
+  .card{background:var(--card-bg); border-radius:var(--r-md); box-shadow:var(--shadow-card); padding:20px 22px;}
+
+  .scan-card{display:flex; flex-direction:column;}
+  .scan-card-head{display:flex; align-items:center; justify-content:space-between;}
+  .scan-card-head .label{font-size:14px; font-weight:700;}
+  .icon-btn{
+    width:30px; height:30px; border-radius:50%; background:var(--panel-bg);
+    display:flex; align-items:center; justify-content:center; color:var(--ink-soft); flex-shrink:0;
+  }
+  .scan-orb-row{display:flex; align-items:center; gap:14px; margin:16px 0 14px;}
+  .scan-orb{
+    width:64px; height:64px; border-radius:50%; flex-shrink:0; position:relative;
+    background:conic-gradient(var(--blue) calc(var(--pct,0)*1%), var(--border) 0);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .scan-orb::before{content:''; position:absolute; inset:6px; border-radius:50%; background:var(--card-bg);}
+  .scan-orb svg{position:relative; z-index:1; color:var(--blue);}
+  .scan-orb-dot{
+    position:absolute; bottom:-2px; right:-2px; width:18px; height:18px; border-radius:50%;
+    background:var(--success); border:3px solid var(--card-bg); z-index:2;
+  }
+  .scan-orb-dot.idle{background:var(--ink-faint);}
+  .scan-title-block strong{font-size:15px; display:block;}
+  .scan-title-block span{font-size:12.5px; color:var(--ink-soft);}
+  .run-scan-btn{
+    width:100%; display:flex; align-items:center; justify-content:center; gap:8px;
+    background:var(--blue); color:#fff; border:none; padding:12px 16px; border-radius:100px;
+    font-size:13.5px; font-weight:700; cursor:pointer; box-shadow:0 10px 20px rgba(52,98,242,0.28);
+    transition:transform .12s ease;
+  }
+  .run-scan-btn:hover{transform:translateY(-1px);}
+  .run-scan-btn:disabled{opacity:.75; cursor:default; transform:none;}
+  .spinner{width:14px; height:14px; border-radius:50%; border:2px solid rgba(255,255,255,.4); border-top-color:#fff; animation:spin .7s linear infinite; display:none;}
+  .run-scan-btn.loading .spinner{display:inline-block;}
+  .run-scan-btn.loading .btn-label{display:none;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .scan-pills{display:flex; gap:8px; margin-top:14px;}
+  .scan-pill{
+    flex:1; background:var(--panel-bg); border-radius:100px; padding:7px 4px; text-align:center;
+  }
+  .scan-pill b{display:block; font-size:13px; font-weight:800;}
+  .scan-pill span{font-size:9.5px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.03em;}
+
+  .grad-card{border-radius:var(--r-md); padding:20px 22px; color:#fff; position:relative; overflow:hidden; box-shadow:var(--shadow-card); display:flex; flex-direction:column; justify-content:space-between; min-height:190px;}
+  .grad-card.risk{background:linear-gradient(150deg,var(--grad-risk-1),var(--grad-risk-2) 55%,var(--grad-risk-3));}
+  .grad-card.upsell{background:linear-gradient(150deg,var(--grad-up-1),var(--grad-up-2) 55%,var(--grad-up-3));}
+  .grad-card-head{display:flex; align-items:flex-start; justify-content:space-between;}
+  .grad-card-head .label{font-size:13.5px; font-weight:700; opacity:.95;}
+  .grad-icon{width:32px; height:32px; border-radius:50%; background:rgba(255,255,255,0.22); display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+  .grad-value{font-size:34px; font-weight:800; letter-spacing:-.02em; margin-top:18px; line-height:1;}
+  .grad-sub{font-size:12px; opacity:.9; margin-top:6px;}
+
+  /* ===== FLAGGED BAR ===== */
+  .flagged-bar{
+    margin:18px 6px 0; background:var(--card-bg); border-radius:var(--r-md); box-shadow:var(--shadow-card);
+    padding:16px 22px; display:flex; align-items:center; justify-content:space-between; gap:18px; flex-wrap:wrap;
+  }
+  .flagged-left strong{font-size:14.5px; font-weight:700; display:block;}
+  .flagged-left span{font-size:12.5px; color:var(--ink-soft);}
+  .avatar-stack{display:flex; align-items:center;}
+  .stack-avatar{
+    width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-size:11px; font-weight:700; color:#fff; border:2.5px solid var(--card-bg); margin-left:-9px;
+  }
+  .stack-avatar:first-child{margin-left:0;}
+  .stack-more{
+    width:32px; height:32px; border-radius:50%; background:var(--panel-bg); color:var(--ink-soft);
+    font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center;
+    border:2.5px solid var(--card-bg); margin-left:-9px;
+  }
+
+  /* ===== ROW 2 ===== */
+  .row-2{display:grid; grid-template-columns:1.6fr 1fr; gap:18px; margin:18px 6px 0; align-items:start;}
+  .col{display:flex; flex-direction:column; gap:18px;}
+
+  .panel{background:var(--card-bg); border-radius:var(--r-md); box-shadow:var(--shadow-card); padding:22px 24px;}
+  .panel-head{display:flex; align-items:flex-start; justify-content:space-between; gap:14px; flex-wrap:wrap;}
+  .panel-head h2{margin:0; font-size:15.5px; font-weight:700;}
+  .panel-head p{margin:3px 0 0; font-size:12.5px; color:var(--ink-soft);}
+  .head-badge{
+    background:var(--panel-bg); font-size:11px; font-weight:700; color:var(--ink-soft);
+    padding:3px 9px; border-radius:100px; margin-left:8px;
+  }
+  select.sort-select{
+    border:1px solid var(--border); background:var(--panel-bg); border-radius:100px;
+    padding:7px 30px 7px 14px; font-size:12.5px; font-family:inherit; color:var(--ink);
+    appearance:none; -webkit-appearance:none; cursor:pointer;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238A8A99' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:right 12px center;
+  }
+
+  /* results panel */
+  .results-panel{min-height:0;}
+  .actions-feed{margin-top:16px; display:flex; flex-direction:column; gap:12px; max-height:430px; overflow-y:auto; padding-right:4px;}
+  .empty-state{display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; gap:8px; padding:44px 20px; color:var(--ink-soft);}
+  .empty-state .es-icon{width:48px; height:48px; border-radius:14px; background:var(--blue-soft); color:var(--blue); display:flex; align-items:center; justify-content:center; margin-bottom:2px;}
+  .empty-state strong{color:var(--ink); font-size:14.5px; font-weight:700;}
+  .empty-state span{font-size:13px; max-width:340px; line-height:1.5;}
+
+  .action-card{border:1px solid var(--border); border-radius:16px; padding:15px 17px; animation:fadeIn .35s ease both;}
+  @keyframes fadeIn{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;}}
+  .action-top{display:flex; align-items:flex-start; justify-content:space-between; gap:10px;}
+  .action-type{font-size:10.5px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; padding:4px 9px; border-radius:100px; display:inline-block; margin-bottom:6px;}
+  .action-type.churn_risk{background:var(--danger-soft); color:var(--danger);}
+  .action-type.upsell{background:var(--success-soft); color:var(--success);}
+  .action-company{font-size:15px; font-weight:700;}
+  .action-arr{font-size:15.5px; font-weight:800; white-space:nowrap;}
+  .action-reason{font-size:13px; color:var(--ink-soft); margin:6px 0 10px; line-height:1.5;}
+  .action-draft{background:var(--panel-bg); border-radius:12px; padding:11px 13px; margin-bottom:10px;}
+  .action-draft .subj{font-size:13px; font-weight:700; margin-bottom:4px;}
+  .action-draft .body{font-size:12.5px; color:var(--ink-soft); line-height:1.5;}
+  .action-draft .toggle-body{font-size:12px; color:var(--blue); font-weight:700; cursor:pointer; margin-top:6px; display:inline-block;}
+  .chip-row{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px;}
+  .chip{font-size:11px; background:var(--blue-soft); color:var(--blue); padding:3px 9px; border-radius:100px; font-weight:600;}
+  .action-foot{display:flex; align-items:center; justify-content:space-between; font-size:11.5px; color:var(--ink-soft); border-top:1px dashed var(--border); padding-top:9px;}
+  .confidence-pill{font-weight:700; color:var(--ink);}
+
+  .results-foot{display:flex; align-items:center; justify-content:space-between; margin-top:18px; padding-top:16px; border-top:1px solid var(--border); flex-wrap:wrap; gap:14px;}
+  .results-stat b{font-size:26px; font-weight:800; display:block; letter-spacing:-.02em;}
+  .results-stat span{font-size:11.5px; color:var(--ink-soft);}
+  .legend-row{display:flex; gap:16px;}
+  .legend-item{display:flex; align-items:center; gap:7px; font-size:12px; color:var(--ink-soft);}
+  .legend-dot{width:9px; height:9px; border-radius:3px; flex-shrink:0;}
+
+  /* accounts list panel */
+  .acct-head-icon{width:30px; height:30px; border-radius:50%; background:var(--panel-bg); display:flex; align-items:center; justify-content:center; color:var(--ink-soft);}
+  .acct-list{margin-top:14px; display:flex; flex-direction:column;}
+  .acct-row{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:11px 0; border-bottom:1px solid var(--border);}
+  .acct-row:last-child{border-bottom:none;}
+  .acct-left strong{font-size:13.5px; font-weight:700; display:block;}
+  .acct-left span{font-size:11.5px; color:var(--ink-soft);}
+  .acct-right{display:flex; align-items:center; gap:8px; flex-shrink:0;}
+  .acct-status{display:flex; align-items:center; gap:6px; font-size:12px; font-weight:600;}
+  .acct-status .sdot{width:8px; height:8px; border-radius:50%;}
+  .acct-status.healthy{color:var(--info);} .acct-status.healthy .sdot{background:var(--info);}
+  .acct-status.churn_risk{color:var(--danger);} .acct-status.churn_risk .sdot{background:var(--danger);}
+  .acct-status.upsell_ready{color:var(--success);} .acct-status.upsell_ready .sdot{background:var(--success);}
+  .arrow-btn{width:26px; height:26px; border-radius:50%; background:var(--panel-bg); display:flex; align-items:center; justify-content:center; color:var(--ink-faint); flex-shrink:0;}
+  .see-all-link{display:flex; align-items:center; gap:6px; justify-content:center; margin-top:14px; padding-top:14px; border-top:1px solid var(--border); font-size:13px; font-weight:700; color:var(--blue); cursor:pointer; background:none; border-left:none; border-right:none; border-bottom:none; width:100%; font-family:inherit;}
+  .acct-scroll{max-height:340px; overflow-y:auto;}
+
+  /* breakdown panel */
+  .bd-row{margin-top:16px;}
+  .bd-row-inner{display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;}
+  .bd-row-inner .bname{font-size:13px; font-weight:600;}
+  .bd-count{font-size:11px; font-weight:700; padding:2px 8px; border-radius:100px;}
+  .bd-count.healthy{background:var(--info-soft); color:var(--info);}
+  .bd-count.churn_risk{background:var(--danger-soft); color:var(--danger);}
+  .bd-count.upsell_ready{background:var(--success-soft); color:var(--success);}
+  .bd-track{height:8px; border-radius:6px; background:var(--panel-bg); overflow:hidden;}
+  .bd-fill{height:100%; border-radius:6px;}
+
+  .skeleton{height:12px; border-radius:6px; background:linear-gradient(90deg,var(--border),#f4f4f9,var(--border)); background-size:200% 100%; animation:shimmer 1.3s ease-in-out infinite;}
+  @keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+
+  @media (max-width:1180px){
+    .row-1{grid-template-columns:1fr;}
+    .row-2{grid-template-columns:1fr;}
+  }
+  @media (max-width:640px){
+    .page{padding:16px;}
+    .board{padding:18px 14px 22px;}
+    .board-top{flex-direction:column; align-items:flex-start;}
+    .search-wrap input{width:160px;}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="board">
+
+    <!-- ===== HEADER ROW ===== -->
+    <div class="board-top">
+      <div class="board-top-left">
+        <div class="logo-mark">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M3 17L10 10L14 14L21 7" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 7H21V13" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="board-top-text">
+          <h1>Aligned <span class="sim-badge">Simulated Portfolio</span></h1>
+          <p id="lastUpdated">Loading portfolio overview…</p>
+        </div>
+      </div>
+      <div class="board-top-right">
+        <div class="search-wrap">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M20 20L16.5 16.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <input id="acctSearch" type="text" placeholder="Search accounts">
+        </div>
+        <div class="avatar-chip" id="statusDot" title="Backend status">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.2" stroke="currentColor" stroke-width="1.8"/><path d="M5 20c0-3.3 3.1-6 7-6s7 2.7 7 6" stroke="currentColor" stroke-width="1.8"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="error-banner" id="errorBanner">
+      <span id="errorText">Can't reach the backend.</span>
+      <button id="retryBtn">Retry</button>
+    </div>
+
+    <!-- ===== ROW 1 ===== -->
+    <div class="row-1">
+      <div class="card scan-card">
+        <div class="scan-card-head">
+          <span class="label">Run scan</span>
+          <div class="icon-btn" id="refreshBtn" title="Refresh data">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M20 12a8 8 0 10-2.6 5.9M20 8v5h-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+        </div>
+        <div class="scan-orb-row">
+          <div class="scan-orb" id="scanOrb" style="--pct:0">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 7v5l3.5 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            <div class="scan-orb-dot idle" id="scanOrbDot"></div>
+          </div>
+          <div class="scan-title-block">
+            <strong id="scanTitle">Ready to scan</strong>
+            <span id="scanSubtitle">No scan run yet</span>
+          </div>
+        </div>
+        <button class="run-scan-btn" id="runScanBtn">
+          <span class="spinner"></span>
+          <span class="btn-label">Run Scan</span>
+        </button>
+        <div class="scan-pills">
+          <div class="scan-pill"><b id="pillAccounts">0</b><span>Accounts</span></div>
+          <div class="scan-pill"><b id="pillActions">0</b><span>Actions</span></div>
+          <div class="scan-pill mono"><b id="pillCost">$0.00</b><span>Est. Cost</span></div>
+        </div>
+      </div>
+
+      <div class="grad-card risk">
+        <div class="grad-card-head">
+          <span class="label">ARR at risk</span>
+          <div class="grad-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 3L2 20h20L12 3z" stroke="#fff" stroke-width="2" stroke-linejoin="round"/><path d="M12 10v4M12 17h.01" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg></div>
+        </div>
+        <div>
+          <div class="grad-value num" id="mArrRisk">$0</div>
+          <div class="grad-sub" id="mArrRiskSub">— accounts flagged</div>
+        </div>
+      </div>
+
+      <div class="grad-card upsell">
+        <div class="grad-card-head">
+          <span class="label">Upsell potential</span>
+          <div class="grad-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 17L10 11L14 15L20 7" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 7H20V13" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        </div>
+        <div>
+          <div class="grad-value num" id="mUpsell">$0</div>
+          <div class="grad-sub" id="mUpsellSub">— accounts ready</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== FLAGGED BAR ===== -->
+    <div class="flagged-bar">
+      <div class="flagged-left">
+        <strong id="flaggedTitle">Accounts flagged</strong>
+        <span id="flaggedSub">Loading…</span>
+      </div>
+      <div class="avatar-stack" id="avatarStack"></div>
+    </div>
+
+    <!-- ===== ROW 2 ===== -->
+    <div class="row-2">
+      <div class="col">
+        <div class="panel results-panel">
+          <div class="panel-head">
+            <div>
+              <h2>Scan results</h2>
+              <p>Outreach drafted per flagged account</p>
+            </div>
+            <select class="sort-select" id="sortSelect">
+              <option value="arr">Sort: Highest ARR</option>
+              <option value="confidence">Sort: Confidence</option>
+              <option value="name">Sort: Company A–Z</option>
+            </select>
+          </div>
+          <div class="actions-feed" id="actionsFeed">
+            <div class="empty-state">
+              <div class="es-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 17L10 11L14 15L20 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 7H20V13" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <strong>No scan run yet</strong>
+              <span>Click Run Scan to flag at-risk accounts, spot upsell opportunities, and draft personalized outreach for each one.</span>
+            </div>
+          </div>
+          <div class="results-foot">
+            <div class="results-stat">
+              <b class="num" id="totalStake">$0</b>
+              <span>Total ARR at stake in this scan</span>
+            </div>
+            <div class="legend-row">
+              <div class="legend-item"><span class="legend-dot" style="background:var(--danger)"></span>Churn risk</div>
+              <div class="legend-item"><span class="legend-dot" style="background:var(--success)"></span>Upsell</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="panel">
+          <div class="panel-head">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <div class="acct-head-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="9" cy="8" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M3 19c0-3 2.7-5.4 6-5.4s6 2.4 6 5.4" stroke="currentColor" stroke-width="1.8"/><circle cx="17" cy="8.5" r="2.4" stroke="currentColor" stroke-width="1.8"/><path d="M14.5 19c.2-2.4 1.9-4.4 4.2-4.4" stroke="currentColor" stroke-width="1.8"/></svg></div>
+              <div>
+                <h2>Flagged accounts <span class="head-badge" id="acctCountBadge">0</span></h2>
+                <p>Highest risk first</p>
+              </div>
+            </div>
+          </div>
+          <div class="acct-scroll" id="acctScroll">
+            <div class="acct-list" id="acctList">
+              <div class="acct-row"><div class="skeleton" style="width:100%"></div></div>
+              <div class="acct-row"><div class="skeleton" style="width:100%"></div></div>
+              <div class="acct-row"><div class="skeleton" style="width:100%"></div></div>
+            </div>
+          </div>
+          <button class="see-all-link" id="seeAllBtn">See all accounts</button>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Portfolio breakdown</h2>
+              <p>Share of total accounts</p>
+            </div>
+          </div>
+          <div id="breakdownBody"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const API_BASE = 'http://localhost:8000';
+  let allAccounts = [];
+  let lastActions = [];
+  let showAllAccounts = false;
+
+  const STATUS_COLOR = { healthy:'var(--info)', churn_risk:'var(--danger)', upsell_ready:'var(--success)' };
+  const AVATAR_COLORS = ['#3462F2','#F0506B','#22B27D','#B98CF0','#F2A93B','#2FB8C6'];
+
+  function fmtMoney(n){
+    n = Number(n) || 0;
+    if (Math.abs(n) >= 1000000) return '$' + (n/1000000).toFixed(1).replace(/\.0$/,'') + 'M';
+    if (Math.abs(n) >= 1000) return '$' + (n/1000).toFixed(1).replace(/\.0$/,'') + 'K';
+    return '$' + Math.round(n).toLocaleString();
+  }
+  function fmtCost(n){ return '$' + (Number(n) || 0).toFixed(2); }
+  function escapeHtml(s){ return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+  function timeAgo(iso){
+    const d = new Date(iso);
+    if (isNaN(d)) return '';
+    return d.toLocaleString(undefined, { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
+  }
+  function initials(name){
+    return (name||'?').split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();
+  }
+  function truncate(s, n){ s = s || ''; return s.length > n ? s.slice(0, n).trim() + '…' : s; }
+
+  function showError(msg){
+    document.getElementById('errorText').textContent = msg;
+    document.getElementById('errorBanner').style.display = 'flex';
+    setBackendStatus(false);
+  }
+  function hideError(){ document.getElementById('errorBanner').style.display = 'none'; }
+  function setBackendStatus(ok){
+    document.getElementById('statusDot').style.color = ok ? 'var(--success)' : 'var(--danger)';
+  }
+
+  async function apiGet(path){
+    const res = await fetch(API_BASE + path);
+    if (!res.ok) throw new Error('HTTP ' + res.status + ' on ' + path);
+    return res.json();
+  }
+  async function apiPost(path){
+    const res = await fetch(API_BASE + path, { method:'POST' });
+    if (!res.ok) throw new Error('HTTP ' + res.status + ' on ' + path);
+    return res.json();
+  }
+
+  // ---------- metrics ----------
+  function renderMetrics(m){
+    document.getElementById('mArrRisk').textContent = fmtMoney(m.arr_at_risk_usd);
+    document.getElementById('mArrRiskSub').textContent = (m.churn_risk ?? 0) + ' accounts flagged';
+
+    document.getElementById('mUpsell').textContent = fmtMoney(m.arr_upsell_potential_usd);
+    document.getElementById('mUpsellSub').textContent = (m.upsell_ready ?? 0) + ' accounts ready';
+
+    document.getElementById('pillAccounts').textContent = m.accounts_total ?? 0;
+    document.getElementById('pillActions').textContent = m.actions_generated ?? 0;
+    document.getElementById('pillCost').textContent = fmtCost(m.cost_usd);
+
+    const flagged = (m.churn_risk ?? 0) + (m.upsell_ready ?? 0);
+    document.getElementById('flaggedSub').textContent = flagged + ' of ' + (m.accounts_total ?? 0) + ' accounts · ' + (m.churn_risk ?? 0) + ' at risk · ' + (m.upsell_ready ?? 0) + ' upsell ready';
+
+    document.getElementById('lastUpdated').textContent = (m.simulated ? 'Simulated data' : 'Live data') + ' · updated ' + new Date().toLocaleTimeString();
+
+    const scanOrb = document.getElementById('scanOrb');
+    const pct = m.accounts_total ? Math.round((flagged / m.accounts_total) * 100) : 0;
+    scanOrb.style.setProperty('--pct', pct);
+
+    renderBreakdown(m);
+  }
+
+  function renderBreakdown(m){
+    const rows = [
+      { key:'healthy', label:'Healthy', count:m.healthy ?? 0 },
+      { key:'churn_risk', label:'Churn risk', count:m.churn_risk ?? 0 },
+      { key:'upsell_ready', label:'Upsell ready', count:m.upsell_ready ?? 0 },
+    ];
+    const total = m.accounts_total || rows.reduce((s,r)=>s+r.count,0) || 1;
+    document.getElementById('breakdownBody').innerHTML = rows.map(r => {
+      const pct = Math.round((r.count/total)*100);
+      return `
+        <div class="bd-row">
+          <div class="bd-row-inner">
+            <span class="bname">${r.label}</span>
+            <span class="bd-count ${r.key}">${r.count} · ${pct}%</span>
+          </div>
+          <div class="bd-track"><div class="bd-fill" style="width:${pct}%; background:${STATUS_COLOR[r.key]};"></div></div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // ---------- accounts ----------
+  function renderAvatarStack(accounts){
+    const flagged = accounts.filter(a => a.status !== 'healthy').sort((a,b)=>(b.risk_score||0)-(a.risk_score||0));
+    const shown = flagged.slice(0, 5);
+    const extra = flagged.length - shown.length;
+    const stack = document.getElementById('avatarStack');
+    stack.innerHTML = shown.map((a,i) => `<div class="stack-avatar" style="background:${AVATAR_COLORS[i % AVATAR_COLORS.length]}" title="${escapeHtml(a.company_name)}">${initials(a.company_name)}</div>`).join('')
+      + (extra > 0 ? `<div class="stack-more">+${extra}</div>` : '');
+  }
+
+  function renderAccountsList(){
+    const q = (document.getElementById('acctSearch').value || '').toLowerCase().trim();
+    let list = [...allAccounts].sort((a,b)=>(b.risk_score||0)-(a.risk_score||0));
+    if (q) list = list.filter(a => (a.company_name||'').toLowerCase().includes(q));
+    document.getElementById('acctCountBadge').textContent = list.length;
+    const display = showAllAccounts ? list : list.slice(0, 5);
+
+    const el = document.getElementById('acctList');
+    if (!display.length){
+      el.innerHTML = '<div style="padding:20px 0; text-align:center; color:var(--ink-soft); font-size:13px;">No matching accounts.</div>';
+    } else {
+      el.innerHTML = display.map(a => `
+        <div class="acct-row">
+          <div class="acct-left">
+            <strong>${escapeHtml(a.company_name)}</strong>
+            <span>${escapeHtml(a.plan)} · ${fmtMoney(a.mrr_usd)} MRR · risk ${a.risk_score ?? 0}</span>
+          </div>
+          <div class="acct-right">
+            <div class="acct-status ${a.status}"><span class="sdot"></span>${(a.status||'').replace('_',' ')}</div>
+            <div class="arrow-btn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M7 17L17 7M9 7h8v8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          </div>
+        </div>
+      `).join('');
+    }
+    document.getElementById('seeAllBtn').textContent = showAllAccounts ? 'Show top 5' : 'See all accounts';
+    document.getElementById('acctScroll').style.maxHeight = showAllAccounts ? '340px' : 'none';
+    document.getElementById('acctScroll').style.overflowY = showAllAccounts ? 'auto' : 'visible';
+  }
+
+  // ---------- actions feed ----------
+  function sortActions(actions, mode){
+    const arr = [...actions];
+    if (mode === 'confidence') arr.sort((a,b)=>(b.confidence||0)-(a.confidence||0));
+    else if (mode === 'name') arr.sort((a,b)=>(a.company_name||'').localeCompare(b.company_name||''));
+    else arr.sort((a,b)=>(b.arr_at_stake_usd||0)-(a.arr_at_stake_usd||0));
+    return arr;
+  }
+
+  function renderActions(actions){
+    lastActions = actions || [];
+    const feed = document.getElementById('actionsFeed');
+    if (!lastActions.length){
+      feed.innerHTML = `
+        <div class="empty-state">
+          <div class="es-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/></svg></div>
+          <strong>Scan complete — nothing flagged</strong>
+          <span>Every account in this portfolio looks healthy right now.</span>
+        </div>`;
+      document.getElementById('totalStake').textContent = '$0';
+      return;
+    }
+    const sorted = sortActions(lastActions, document.getElementById('sortSelect').value);
+    feed.innerHTML = sorted.map((a, i) => {
+      const typeLabel = a.action_type === 'upsell' ? 'Upsell' : 'Churn risk';
+      const memChips = (a.memory_used || []).map(m => `<span class="chip">${escapeHtml(m)}</span>`).join('');
+      const conf = a.confidence != null ? Math.round((a.confidence <= 1 ? a.confidence*100 : a.confidence)) + '%' : '—';
+      const bodyId = 'body_' + a.action_id;
+      return `
+        <div class="action-card" style="animation-delay:${i*40}ms">
+          <div class="action-top">
+            <div>
+              <span class="action-type ${a.action_type}">${typeLabel}</span>
+              <div class="action-company">${escapeHtml(a.company_name)}</div>
+            </div>
+            <div class="action-arr" style="color:${a.action_type==='upsell' ? 'var(--success)' : 'var(--danger)'}">${fmtMoney(a.arr_at_stake_usd)}</div>
+          </div>
+          <div class="action-reason">${escapeHtml(a.reason)}</div>
+          <div class="action-draft">
+            <div class="subj">${escapeHtml(a.draft_subject)}</div>
+            <div class="body" id="${bodyId}" data-full="${escapeHtml(a.draft_body || '')}">${escapeHtml(truncate(a.draft_body, 140))}</div>
+            ${ (a.draft_body && a.draft_body.length > 140) ? `<span class="toggle-body" onclick="toggleBody('${bodyId}')">Show full draft</span>` : '' }
+          </div>
+          ${ memChips ? `<div class="chip-row">${memChips}</div>` : '' }
+          <div class="action-foot">
+            <span>Triggered ${timeAgo(a.triggered_at)}</span>
+            <span><span class="confidence-pill">${conf}</span> confidence · ${(a.tokens_used||0).toLocaleString()} tok · ${fmtCost(a.cost_usd)}</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    const totalStake = lastActions.reduce((s,a)=>s+(Number(a.arr_at_stake_usd)||0),0);
+    document.getElementById('totalStake').textContent = fmtMoney(totalStake);
+  }
+  window.toggleBody = function(id){
+    const el = document.getElementById(id);
+    const full = el.getAttribute('data-full');
+    const isTrunc = el.textContent.endsWith('…');
+    el.textContent = isTrunc ? full : truncate(full, 140);
+  };
+
+  // ---------- load flows ----------
+  async function loadMetrics(){ renderMetrics(await apiGet('/api/metrics')); }
+  async function loadAccounts(){
+    allAccounts = await apiGet('/api/accounts');
+    renderAvatarStack(allAccounts);
+    renderAccountsList();
+  }
+
+  async function initialLoad(){
+    try{
+      await Promise.all([loadMetrics(), loadAccounts()]);
+      hideError(); setBackendStatus(true);
+    }catch(err){
+      console.error(err);
+      showError("Can't reach the backend at " + API_BASE + " — make sure it's running, then retry.");
+    }
+  }
+
+  async function runScan(){
+    const btn = document.getElementById('runScanBtn');
+    btn.classList.add('loading'); btn.disabled = true;
+    document.getElementById('scanTitle').textContent = 'Scanning…';
+    document.getElementById('scanSubtitle').textContent = 'Analyzing ' + (allAccounts.length || 'all') + ' accounts';
+    try{
+      const actions = await apiPost('/api/scan');
+      renderActions(actions);
+      document.getElementById('scanTitle').textContent = 'Scan complete';
+      document.getElementById('scanSubtitle').textContent = actions.length + ' action' + (actions.length===1?'':'s') + ' generated';
+      document.getElementById('scanOrbDot').classList.remove('idle');
+      hideError(); setBackendStatus(true);
+      await Promise.all([loadMetrics(), loadAccounts()]);
+    }catch(err){
+      console.error(err);
+      showError("Scan failed — can't reach the backend at " + API_BASE + ". Make sure it's running, then retry.");
+      document.getElementById('scanTitle').textContent = 'Scan failed';
+      document.getElementById('scanSubtitle').textContent = 'Check backend connection';
+    }finally{
+      btn.classList.remove('loading'); btn.disabled = false;
+    }
+  }
+
+  document.getElementById('runScanBtn').addEventListener('click', runScan);
+  document.getElementById('retryBtn').addEventListener('click', initialLoad);
+  document.getElementById('refreshBtn').addEventListener('click', initialLoad);
+  document.getElementById('sortSelect').addEventListener('change', () => renderActions(lastActions));
+  document.getElementById('acctSearch').addEventListener('input', renderAccountsList);
+  document.getElementById('seeAllBtn').addEventListener('click', () => { showAllAccounts = !showAllAccounts; renderAccountsList(); });
+
+  initialLoad();
+</script>
+</body>
+</html>
