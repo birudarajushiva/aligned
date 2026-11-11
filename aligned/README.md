@@ -5,9 +5,9 @@ renewal. Aligned watches every account in a portfolio, flags churn risk and
 upsell readiness with rules you can read, and drafts outreach grounded in that
 specific customer's own history.
 
-The pitch in one line: **it surfaced $60,468 of at-risk ARR across a 12-account
+Simulated demonstration only: **the synthetic portfolio surfaces $60,468 of at-risk ARR across a 12-account
 portfolio, against a $2,388/year subscription to Aligned itself ($199/mo) —
-a 25.32x multiple.**
+a 25.32x modeled multiple.** These are invented inputs, not customer outcomes.
 
 Three pieces:
 
